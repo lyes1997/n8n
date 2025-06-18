@@ -1,5 +1,5 @@
 import { OidcConfigDto } from '@n8n/api-types';
-import { Body, Get, GlobalScope, Licensed, Post, RestController } from '@n8n/decorators';
+import { Body, Get, GlobalScope, Post, RestController } from '@n8n/decorators';
 import { Request, Response } from 'express';
 
 import { AuthService } from '@/auth/auth.service';
@@ -18,7 +18,6 @@ export class OidcController {
 	) {}
 
 	@Get('/config')
-	@Licensed('feat:oidc')
 	@GlobalScope('oidc:manage')
 	async retrieveConfiguration(_req: AuthenticatedRequest) {
 		const config = await this.oidcService.loadConfig();
@@ -29,7 +28,6 @@ export class OidcController {
 	}
 
 	@Post('/config')
-	@Licensed('feat:oidc')
 	@GlobalScope('oidc:manage')
 	async saveConfiguration(
 		_req: AuthenticatedRequest,

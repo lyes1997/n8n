@@ -1,14 +1,5 @@
 import { VariableListRequestDto } from '@n8n/api-types';
-import {
-	Delete,
-	Get,
-	GlobalScope,
-	Licensed,
-	Patch,
-	Post,
-	Query,
-	RestController,
-} from '@n8n/decorators';
+import { Delete, Get, GlobalScope, Patch, Post, Query, RestController } from '@n8n/decorators';
 
 import { BadRequestError } from '@/errors/response-errors/bad-request.error';
 import { NotFoundError } from '@/errors/response-errors/not-found.error';
@@ -29,7 +20,6 @@ export class VariablesController {
 	}
 
 	@Post('/')
-	@Licensed('feat:variables')
 	@GlobalScope('variable:create')
 	async createVariable(req: VariablesRequest.Create) {
 		const variable = req.body;
@@ -58,7 +48,6 @@ export class VariablesController {
 	}
 
 	@Patch('/:id')
-	@Licensed('feat:variables')
 	@GlobalScope('variable:update')
 	async updateVariable(req: VariablesRequest.Update) {
 		const id = req.params.id;

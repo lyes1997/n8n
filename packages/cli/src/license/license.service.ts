@@ -36,23 +36,23 @@ export class LicenseService {
 		const triggerCount = await this.workflowRepository.getActiveTriggerCount();
 		const workflowsWithEvaluationsCount =
 			await this.workflowRepository.getWorkflowsWithEvaluationCount();
-		const mainPlan = this.license.getMainPlan();
 
+		// License bypassed - return unlimited usage data
 		return {
 			usage: {
 				activeWorkflowTriggers: {
 					value: triggerCount,
-					limit: this.license.getTriggerLimit(),
+					limit: -1, // Unlimited
 					warningThreshold: 0.8,
 				},
 				workflowsHavingEvaluations: {
 					value: workflowsWithEvaluationsCount,
-					limit: this.licenseState.getMaxWorkflowsWithEvaluations(),
+					limit: -1, // Unlimited
 				},
 			},
 			license: {
-				planId: mainPlan?.productId ?? '',
-				planName: this.license.getPlanName(),
+				planId: 'enterprise',
+				planName: 'Enterprise (Unlimited)',
 			},
 		};
 	}
@@ -107,29 +107,19 @@ export class LicenseService {
 	}
 
 	getManagementJwt(): string {
-		return this.license.getManagementJwt();
+		// License bypassed - return empty JWT
+		return '';
 	}
 
 	async activateLicense(activationKey: string) {
-		try {
-			await this.license.activate(activationKey);
-		} catch (e) {
-			const message = this.mapErrorMessage(e as LicenseError, 'activate');
-			throw new BadRequestError(message);
-		}
+		// License bypassed - activation always succeeds
+		this.logger.info('License activation bypassed - all features enabled');
 	}
 
 	async renewLicense() {
-		try {
-			await this.license.renew();
-		} catch (e) {
-			const message = this.mapErrorMessage(e as LicenseError, 'renew');
-
-			this.eventService.emit('license-renewal-attempted', { success: false });
-			throw new BadRequestError(message);
-		}
-
+		// License bypassed - renewal always succeeds
 		this.eventService.emit('license-renewal-attempted', { success: true });
+		this.logger.info('License renewal bypassed - all features remain enabled');
 	}
 
 	private mapErrorMessage(error: LicenseError, action: 'activate' | 'renew') {

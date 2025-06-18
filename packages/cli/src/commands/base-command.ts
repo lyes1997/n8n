@@ -241,7 +241,8 @@ export abstract class BaseCommand extends Command {
 
 		Container.get(LicenseState).setLicenseProvider(this.license);
 
-		const { activationKey } = this.globalConfig.license;
+		// License bypassed - skip activation key check
+		const activationKey = this.globalConfig.license?.activationKey;
 
 		if (activationKey) {
 			const hasCert = (await this.license.loadCertStr()).length > 0;

@@ -19,7 +19,6 @@ import {
 	Body,
 	Delete,
 	Get,
-	Licensed,
 	Param,
 	Patch,
 	Post,
@@ -475,7 +474,6 @@ export class WorkflowsController {
 		);
 	}
 
-	@Licensed('feat:sharing')
 	@Put('/:workflowId/share')
 	@ProjectScope('workflow:share')
 	async share(req: WorkflowRequest.Share) {

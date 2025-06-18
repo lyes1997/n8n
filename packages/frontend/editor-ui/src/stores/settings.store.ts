@@ -72,7 +72,26 @@ export const useSettingsStore = defineStore(STORES.SETTINGS, () => {
 		secureCookie: settings.value.authCookie.secure,
 	}));
 
-	const isEnterpriseFeatureEnabled = computed(() => settings.value.enterprise);
+	const isEnterpriseFeatureEnabled = computed(() => {
+		// License bypassed - all enterprise features are enabled
+		return {
+			AdvancedExecutionFilters: true,
+			Sharing: true,
+			Ldap: true,
+			LogStreaming: true,
+			Variables: true,
+			Saml: true,
+			Oidc: true,
+			SourceControl: true,
+			ExternalSecrets: true,
+			AuditLogs: true,
+			DebugInEditor: true,
+			WorkflowHistory: true,
+			WorkerView: true,
+			AdvancedPermissions: true,
+			ApiKeyScopes: true,
+		};
+	});
 
 	const nodeJsVersion = computed(() => settings.value.nodeJsVersion);
 

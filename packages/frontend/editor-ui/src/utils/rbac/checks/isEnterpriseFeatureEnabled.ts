@@ -4,16 +4,6 @@ import type { RBACPermissionCheck, EnterprisePermissionOptions } from '@/types/r
 export const isEnterpriseFeatureEnabled: RBACPermissionCheck<EnterprisePermissionOptions> = (
 	options,
 ) => {
-	if (!options?.feature) {
-		return true;
-	}
-
-	const features = Array.isArray(options.feature) ? options.feature : [options.feature];
-	const settingsStore = useSettingsStore();
-	const mode = options.mode ?? 'allOf';
-	if (mode === 'allOf') {
-		return features.every((feature) => settingsStore.isEnterpriseFeatureEnabled[feature]);
-	} else {
-		return features.some((feature) => settingsStore.isEnterpriseFeatureEnabled[feature]);
-	}
+	// License bypassed - all enterprise features are enabled
+	return true;
 };

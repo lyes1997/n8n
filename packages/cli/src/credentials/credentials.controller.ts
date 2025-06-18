@@ -10,7 +10,6 @@ import { SharedCredentials, ProjectRelationRepository, SharedCredentialsReposito
 import {
 	Delete,
 	Get,
-	Licensed,
 	Patch,
 	Post,
 	Put,
@@ -289,7 +288,6 @@ export class CredentialsController {
 		return true;
 	}
 
-	@Licensed('feat:sharing')
 	@Put('/:credentialId/share')
 	@ProjectScope('credential:share')
 	async shareCredentials(req: CredentialRequest.Share) {

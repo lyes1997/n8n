@@ -10,16 +10,7 @@ import {
 	SharedWorkflowRepository,
 	UserRepository,
 } from '@n8n/db';
-import {
-	GlobalScope,
-	Delete,
-	Get,
-	RestController,
-	Patch,
-	Licensed,
-	Body,
-	Param,
-} from '@n8n/decorators';
+import { GlobalScope, Delete, Get, RestController, Patch, Body, Param } from '@n8n/decorators';
 import { Response } from 'express';
 
 import { AuthService } from '@/auth/auth.service';
@@ -272,7 +263,6 @@ export class UsersController {
 
 	@Patch('/:id/role')
 	@GlobalScope('user:changeRole')
-	@Licensed('feat:advancedPermissions')
 	async changeGlobalRole(
 		req: AuthenticatedRequest,
 		_: Response,
