@@ -12,9 +12,7 @@ export const useSourceControlStore = defineStore('sourceControl', () => {
 	const rootStore = useRootStore();
 	const settingsStore = useSettingsStore();
 
-	const isEnterpriseSourceControlEnabled = computed(
-		() => settingsStore.isEnterpriseFeatureEnabled[EnterpriseEditionFeature.SourceControl],
-	);
+	const isEnterpriseSourceControlEnabled = computed(() => true); // License bypassed - Source Control always enabled
 
 	const sshKeyTypes: SshKeyTypes = ['ed25519', 'rsa'];
 	const sshKeyTypesWithLabel = reactive(

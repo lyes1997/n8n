@@ -80,9 +80,7 @@ const usersListActions = computed((): IUserListAction[] => {
 		},
 	];
 });
-const isAdvancedPermissionsEnabled = computed((): boolean => {
-	return settingsStore.isEnterpriseFeatureEnabled[EnterpriseEditionFeature.AdvancedPermissions];
-});
+const isAdvancedPermissionsEnabled = computed(() => true); // License bypassed - Advanced Permissions always enabled
 
 const userRoles = computed((): Array<{ value: Role; label: string; disabled?: boolean }> => {
 	return [

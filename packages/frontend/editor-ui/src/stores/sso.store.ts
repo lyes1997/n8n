@@ -46,19 +46,19 @@ export const useSSOStore = defineStore('sso', () => {
 	}) => {
 		authenticationMethod.value = options.authenticationMethod;
 
-		isEnterpriseLdapEnabled.value = options.features.ldap;
+		// License bypassed - keep LDAP always enabled
 		if (options.config.ldap) {
 			ldap.value.loginEnabled = options.config.ldap.loginEnabled;
 			ldap.value.loginLabel = options.config.ldap.loginLabel;
 		}
 
-		isEnterpriseSamlEnabled.value = options.features.saml;
+		// License bypassed - keep SAML always enabled
 		if (options.config.saml) {
 			saml.value.loginEnabled = options.config.saml.loginEnabled;
 			saml.value.loginLabel = options.config.saml.loginLabel;
 		}
 
-		isEnterpriseOidcEnabled.value = options.features.oidc;
+		// License bypassed - keep OIDC always enabled
 		if (options.config.oidc) {
 			oidc.value.loginEnabled = options.config.oidc.loginEnabled;
 			oidc.value.loginUrl = options.config.oidc.loginUrl || '';
@@ -85,7 +85,7 @@ export const useSSOStore = defineStore('sso', () => {
 		},
 	});
 
-	const isEnterpriseSamlEnabled = ref(false);
+	const isEnterpriseSamlEnabled = ref(true); // License bypassed - SAML always enabled
 
 	const isDefaultAuthenticationSaml = computed(
 		() => authenticationMethod.value === UserManagementAuthenticationMethod.Saml,
@@ -124,7 +124,7 @@ export const useSSOStore = defineStore('sso', () => {
 
 	const oidcConfig = ref<OidcConfigDto | undefined>();
 
-	const isEnterpriseOidcEnabled = ref(false);
+	const isEnterpriseOidcEnabled = ref(true); // License bypassed - OIDC always enabled
 
 	const getOidcConfig = async () => {
 		const config = await ssoApi.getOidcConfig(rootStore.restApiContext);
@@ -158,7 +158,7 @@ export const useSSOStore = defineStore('sso', () => {
 		loginEnabled: false,
 	});
 
-	const isEnterpriseLdapEnabled = ref(false);
+	const isEnterpriseLdapEnabled = ref(true); // License bypassed - LDAP always enabled
 
 	const isLdapLoginEnabled = computed(() => ldap.value.loginEnabled);
 

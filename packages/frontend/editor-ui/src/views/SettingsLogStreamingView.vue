@@ -40,10 +40,7 @@ const sortedItemKeysByLabel = computed(() => {
 	return sortedKeys.sort((a, b) => a.label.localeCompare(b.label));
 });
 
-const isLicensed = computed((): boolean => {
-	if (disableLicense.value) return false;
-	return settingsStore.isEnterpriseFeatureEnabled[EnterpriseEditionFeature.LogStreaming];
-});
+const isLicensed = computed(() => true); // License bypassed - Log Streaming always enabled
 
 const canManageLogStreaming = computed((): boolean => {
 	return hasPermission(['rbac'], { rbac: { scope: 'logStreaming:manage' } });

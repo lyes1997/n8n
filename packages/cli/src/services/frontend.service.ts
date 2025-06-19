@@ -220,8 +220,8 @@ export class FrontendService {
 			},
 			hideUsagePage: this.globalConfig.hideUsagePage,
 			license: {
-				consumerId: 'unknown',
-				environment: this.globalConfig.license.tenantId === 1 ? 'production' : 'staging',
+				consumerId: 'enterprise-unlimited',
+				environment: 'production', // License bypassed - always production
 			},
 			variables: {
 				limit: 0,

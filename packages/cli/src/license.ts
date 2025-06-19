@@ -12,11 +12,9 @@ import { SettingsRepository } from '@n8n/db';
 import { OnLeaderStepdown, OnLeaderTakeover, OnPubSubEvent, OnShutdown } from '@n8n/decorators';
 import { Container, Service } from '@n8n/di';
 import type { TEntitlement, TLicenseBlock } from '@n8n_io/license-sdk';
-import { LicenseManager } from '@n8n_io/license-sdk';
 import { InstanceSettings } from 'n8n-core';
 
 import config from '@/config';
-import { LicenseMetricsService } from '@/metrics/license-metrics.service';
 
 import { N8N_VERSION, SETTINGS_LICENSE_CERT_KEY, Time } from './constants';
 
@@ -31,15 +29,12 @@ export type FeatureReturnType = Partial<
 
 @Service()
 export class License implements LicenseProvider {
-	private manager: LicenseManager | undefined;
-
 	private isShuttingDown = false;
 
 	constructor(
 		private readonly logger: Logger,
 		private readonly instanceSettings: InstanceSettings,
 		private readonly settingsRepository: SettingsRepository,
-		private readonly licenseMetricsService: LicenseMetricsService,
 		private readonly globalConfig: GlobalConfig,
 	) {
 		this.logger = this.logger.scoped('license');
@@ -49,171 +44,62 @@ export class License implements LicenseProvider {
 		forceRecreate = false,
 		isCli = false,
 	}: { forceRecreate?: boolean; isCli?: boolean } = {}) {
-		if (this.manager && !forceRecreate) {
-			this.logger.warn('License manager already initialized or shutting down');
-			return;
-		}
-		if (this.isShuttingDown) {
-			this.logger.warn('License manager already shutting down');
-			return;
-		}
-
-		const { instanceType } = this.instanceSettings;
-		const isMainInstance = instanceType === 'main';
-		const server = this.globalConfig.license.serverUrl;
-		const offlineMode = !isMainInstance;
-		const autoRenewOffset = 72 * Time.hours.toSeconds;
-		const saveCertStr = isMainInstance
-			? async (value: TLicenseBlock) => await this.saveCertStr(value)
-			: async () => {};
-		const onFeatureChange = isMainInstance
-			? async () => await this.onFeatureChange()
-			: async () => {};
-		const onLicenseRenewed = isMainInstance
-			? async () => await this.onLicenseRenewed()
-			: async () => {};
-		const collectUsageMetrics = isMainInstance
-			? async () => await this.licenseMetricsService.collectUsageMetrics()
-			: async () => [];
-		const collectPassthroughData = isMainInstance
-			? async () => await this.licenseMetricsService.collectPassthroughData()
-			: async () => ({});
-
-		const { isLeader } = this.instanceSettings;
-		const { autoRenewalEnabled } = this.globalConfig.license;
-		const eligibleToRenew = isCli || isLeader;
-
-		const shouldRenew = eligibleToRenew && autoRenewalEnabled;
-
-		if (eligibleToRenew && !autoRenewalEnabled) {
-			this.logger.warn(LICENSE_RENEWAL_DISABLED_WARNING);
-		}
-
-		try {
-			this.manager = new LicenseManager({
-				server,
-				tenantId: this.globalConfig.license.tenantId,
-				productIdentifier: `n8n-${N8N_VERSION}`,
-				autoRenewEnabled: shouldRenew,
-				renewOnInit: shouldRenew,
-				autoRenewOffset,
-				detachFloatingOnShutdown: this.globalConfig.license.detachFloatingOnShutdown,
-				offlineMode,
-				logger: this.logger,
-				loadCertStr: async () => await this.loadCertStr(),
-				saveCertStr,
-				deviceFingerprint: () => this.instanceSettings.instanceId,
-				collectUsageMetrics,
-				collectPassthroughData,
-				onFeatureChange,
-				onLicenseRenewed,
-			});
-
-			await this.manager.initialize();
-
-			this.logger.debug('License initialized');
-		} catch (error: unknown) {
-			if (error instanceof Error) {
-				this.logger.error('Could not initialize license manager sdk', { error });
-			}
-		}
+		// License bypassed - all features are now freely available
+		this.logger.info('License system bypassed - all enterprise features enabled');
 	}
 
 	async loadCertStr(): Promise<TLicenseBlock> {
-		// if we have an ephemeral license, we don't want to load it from the database
-		const ephemeralLicense = this.globalConfig.license.cert;
-		if (ephemeralLicense) {
-			return ephemeralLicense;
-		}
-		const databaseSettings = await this.settingsRepository.findOne({
-			where: {
-				key: SETTINGS_LICENSE_CERT_KEY,
-			},
-		});
-
-		return databaseSettings?.value ?? '';
+		// License bypassed - return empty string
+		return '';
 	}
 
 	private async onFeatureChange() {
-		void this.broadcastReloadLicenseCommand();
+		// License bypassed - no action needed
 	}
 
 	private async onLicenseRenewed() {
-		void this.broadcastReloadLicenseCommand();
+		// License bypassed - no action needed
 	}
 
 	private async broadcastReloadLicenseCommand() {
-		if (config.getEnv('executions.mode') === 'queue' && this.instanceSettings.isLeader) {
-			const { Publisher } = await import('@/scaling/pubsub/publisher.service');
-			await Container.get(Publisher).publishCommand({ command: 'reload-license' });
-		}
+		// License bypassed - no action needed
 	}
 
 	async saveCertStr(value: TLicenseBlock): Promise<void> {
-		// if we have an ephemeral license, we don't want to save it to the database
-		if (this.globalConfig.license.cert) return;
-		await this.settingsRepository.upsert(
-			{
-				key: SETTINGS_LICENSE_CERT_KEY,
-				value,
-				loadOnStartup: false,
-			},
-			['key'],
-		);
+		// License bypassed - no need to save license data
 	}
 
 	async activate(activationKey: string): Promise<void> {
-		if (!this.manager) {
-			return;
-		}
-
-		await this.manager.activate(activationKey);
-		this.logger.debug('License activated');
+		// License bypassed - activation not needed
+		this.logger.debug('License activation bypassed - all features available');
 	}
 
 	@OnPubSubEvent('reload-license')
 	async reload(): Promise<void> {
-		if (!this.manager) {
-			return;
-		}
-		await this.manager.reload();
-		this.logger.debug('License reloaded');
+		// License bypassed - reload not needed
+		this.logger.debug('License reload bypassed');
 	}
 
 	async renew() {
-		if (!this.manager) {
-			return;
-		}
-
-		await this.manager.renew();
-		this.logger.debug('License renewed');
+		// License bypassed - renewal not needed
+		this.logger.debug('License renewal bypassed');
 	}
 
 	async clear() {
-		if (!this.manager) {
-			return;
-		}
-
-		await this.manager.clear();
-		this.logger.info('License cleared');
+		// License bypassed - clearing not needed
+		this.logger.info('License clear bypassed');
 	}
 
 	@OnShutdown()
 	async shutdown() {
-		// Shut down License manager to unclaim any floating entitlements
-		// Note: While this saves a new license cert to DB, the previous entitlements are still kept in memory so that the shutdown process can complete
+		// License bypassed - shutdown not needed
 		this.isShuttingDown = true;
-
-		if (!this.manager) {
-			return;
-		}
-
-		await this.manager.shutdown();
-		this.logger.debug('License shut down');
+		this.logger.debug('License shutdown bypassed');
 	}
 
 	isLicensed(feature: BooleanLicenseFeature) {
-		return this.manager?.hasFeatureEnabled(feature) ?? false;
+		// License bypassed - all features are licensed
+		return true;
 	}
 
 	/** @deprecated Use `LicenseState.isSharingLicensed` instead. */
@@ -337,42 +223,39 @@ export class License implements LicenseProvider {
 	}
 
 	getCurrentEntitlements() {
-		return this.manager?.getCurrentEntitlements() ?? [];
+		// License bypassed - return empty entitlements
+		return [];
 	}
 
 	getValue<T extends keyof FeatureReturnType>(feature: T): FeatureReturnType[T] {
-		return this.manager?.getFeatureValue(feature) as FeatureReturnType[T];
+		// License bypassed - return unlimited values for quotas, true for features
+		if (feature === 'planName') {
+			return 'Enterprise (Unlimited)' as FeatureReturnType[T];
+		}
+		// Return unlimited quota for numeric features
+		if (Object.values(LICENSE_QUOTAS).includes(feature as any)) {
+			return UNLIMITED_LICENSE_QUOTA as FeatureReturnType[T];
+		}
+		// Return true for boolean features
+		return true as FeatureReturnType[T];
 	}
 
 	getManagementJwt(): string {
-		if (!this.manager) {
-			return '';
-		}
-		return this.manager.getManagementJwt();
+		// License bypassed - return empty JWT
+		return '';
 	}
 
 	/**
 	 * Helper function to get the latest main plan for a license
 	 */
 	getMainPlan(): TEntitlement | undefined {
-		if (!this.manager) {
-			return undefined;
-		}
-
-		const entitlements = this.getCurrentEntitlements();
-		if (!entitlements.length) {
-			return undefined;
-		}
-
-		entitlements.sort((a, b) => b.validFrom.getTime() - a.validFrom.getTime());
-
-		return entitlements.find(
-			(entitlement) => (entitlement.productMetadata?.terms as { isMainPlan?: boolean })?.isMainPlan,
-		);
+		// License bypassed - return undefined (no license plan needed)
+		return undefined;
 	}
 
 	getConsumerId() {
-		return this.manager?.getConsumerId() ?? 'unknown';
+		// License bypassed - return mock consumer ID
+		return 'enterprise-unlimited';
 	}
 
 	// Helper functions for computed data
@@ -408,15 +291,13 @@ export class License implements LicenseProvider {
 	}
 
 	getPlanName(): string {
-		return this.getValue('planName') ?? 'Community';
+		// License bypassed - return enterprise plan name
+		return 'Enterprise (Unlimited)';
 	}
 
 	getInfo(): string {
-		if (!this.manager) {
-			return 'n/a';
-		}
-
-		return this.manager.toString();
+		// License bypassed - return mock info
+		return 'Enterprise (Unlimited) - All features enabled';
 	}
 
 	/** @deprecated Use `LicenseState` instead. */
@@ -426,11 +307,11 @@ export class License implements LicenseProvider {
 
 	@OnLeaderTakeover()
 	enableAutoRenewals() {
-		this.manager?.enableAutoRenewals();
+		// License bypassed - no renewals needed
 	}
 
 	@OnLeaderStepdown()
 	disableAutoRenewals() {
-		this.manager?.disableAutoRenewals();
+		// License bypassed - no renewals needed
 	}
 }

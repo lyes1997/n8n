@@ -36,35 +36,31 @@ export class LicenseService {
 		const triggerCount = await this.workflowRepository.getActiveTriggerCount();
 		const workflowsWithEvaluationsCount =
 			await this.workflowRepository.getWorkflowsWithEvaluationCount();
-		const mainPlan = this.license.getMainPlan();
 
+		// License bypassed - return unlimited usage data
 		return {
 			usage: {
 				activeWorkflowTriggers: {
 					value: triggerCount,
-					limit: this.license.getTriggerLimit(),
+					limit: -1, // Unlimited
 					warningThreshold: 0.8,
 				},
 				workflowsHavingEvaluations: {
 					value: workflowsWithEvaluationsCount,
-					limit: this.licenseState.getMaxWorkflowsWithEvaluations(),
+					limit: -1, // Unlimited
 				},
 			},
 			license: {
-				planId: mainPlan?.productId ?? '',
-				planName: this.license.getPlanName(),
+				planId: 'enterprise',
+				planName: 'Enterprise (Unlimited)',
 			},
 		};
 	}
 
 	async requestEnterpriseTrial(user: User) {
-		await axios.post('https://enterprise.n8n.io/enterprise-trial', {
-			licenseType: 'enterprise',
-			firstName: user.firstName,
-			lastName: user.lastName,
-			email: user.email,
-			instanceUrl: this.urlService.getWebhookBaseUrl(),
-		});
+		// License bypassed - no external license server calls needed
+		this.logger.info('Enterprise trial request bypassed - all features already enabled');
+		return;
 	}
 
 	async registerCommunityEdition({
@@ -80,56 +76,33 @@ export class LicenseService {
 		instanceUrl: string;
 		licenseType: string;
 	}): Promise<{ title: string; text: string }> {
-		try {
-			const {
-				data: { licenseKey, ...rest },
-			} = await axios.post<{ title: string; text: string; licenseKey: string }>(
-				'https://enterprise.n8n.io/community-registered',
-				{
-					email,
-					instanceId,
-					instanceUrl,
-					licenseType,
-				},
-			);
-			this.eventService.emit('license-community-plus-registered', { userId, email, licenseKey });
-			return rest;
-		} catch (e: unknown) {
-			if (e instanceof AxiosError) {
-				const error = e as AxiosError<{ message: string }>;
-				const errorMsg = error.response?.data?.message ?? e.message;
-				throw new BadRequestError('Failed to register community edition: ' + errorMsg);
-			} else {
-				this.logger.error('Failed to register community edition', { error: ensureError(e) });
-				throw new BadRequestError('Failed to register community edition');
-			}
-		}
+		// License bypassed - no external license server calls needed
+		this.logger.info('Community edition registration bypassed - all features already enabled');
+		this.eventService.emit('license-community-plus-registered', {
+			userId,
+			email,
+			licenseKey: 'bypassed',
+		});
+		return {
+			title: 'Registration Complete',
+			text: 'All enterprise features are enabled without registration.',
+		};
 	}
 
 	getManagementJwt(): string {
-		return this.license.getManagementJwt();
+		// License bypassed - return empty JWT
+		return '';
 	}
 
 	async activateLicense(activationKey: string) {
-		try {
-			await this.license.activate(activationKey);
-		} catch (e) {
-			const message = this.mapErrorMessage(e as LicenseError, 'activate');
-			throw new BadRequestError(message);
-		}
+		// License bypassed - activation always succeeds
+		this.logger.info('License activation bypassed - all features enabled');
 	}
 
 	async renewLicense() {
-		try {
-			await this.license.renew();
-		} catch (e) {
-			const message = this.mapErrorMessage(e as LicenseError, 'renew');
-
-			this.eventService.emit('license-renewal-attempted', { success: false });
-			throw new BadRequestError(message);
-		}
-
+		// License bypassed - renewal always succeeds
 		this.eventService.emit('license-renewal-attempted', { success: true });
+		this.logger.info('License renewal bypassed - all features remain enabled');
 	}
 
 	private mapErrorMessage(error: LicenseError, action: 'activate' | 'renew') {

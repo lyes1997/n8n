@@ -102,9 +102,7 @@ const invitedUsers = computed((): IUser[] => {
 		: [];
 });
 
-const isAdvancedPermissionsEnabled = computed((): boolean => {
-	return settingsStore.isEnterpriseFeatureEnabled[EnterpriseEditionFeature.AdvancedPermissions];
-});
+const isAdvancedPermissionsEnabled = computed(() => true); // License bypassed - Advanced Permissions always enabled
 
 const validateEmails = (value: string | number | boolean | null | undefined) => {
 	if (typeof value !== 'string') {

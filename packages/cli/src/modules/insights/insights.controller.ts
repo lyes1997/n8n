@@ -1,6 +1,6 @@
 import { InsightsDateFilterDto, ListInsightsWorkflowQueryDto } from '@n8n/api-types';
 import type { InsightsSummary, InsightsByTime, InsightsByWorkflow } from '@n8n/api-types';
-import { Get, GlobalScope, Licensed, Query, RestController } from '@n8n/decorators';
+import { Get, GlobalScope, Query, RestController } from '@n8n/decorators';
 import type { UserError } from 'n8n-workflow';
 
 import { AuthenticatedRequest } from '@/requests';
@@ -46,7 +46,6 @@ export class InsightsController {
 
 	@Get('/by-workflow')
 	@GlobalScope('insights:list')
-	@Licensed('feat:insights:viewDashboard')
 	async getInsightsByWorkflow(
 		_req: AuthenticatedRequest,
 		_res: Response,
@@ -65,7 +64,6 @@ export class InsightsController {
 
 	@Get('/by-time')
 	@GlobalScope('insights:list')
-	@Licensed('feat:insights:viewDashboard')
 	async getInsightsByTime(
 		_req: AuthenticatedRequest,
 		_res: Response,

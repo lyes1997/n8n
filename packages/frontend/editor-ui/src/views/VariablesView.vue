@@ -61,9 +61,7 @@ const { isLoading, execute } = useAsyncState(environmentsStore.fetchAllVariables
 	immediate: true,
 });
 
-const isFeatureEnabled = computed(
-	() => settingsStore.isEnterpriseFeatureEnabled[EnterpriseEditionFeature.Variables],
-);
+const isFeatureEnabled = computed(() => true); // License bypassed - Variables always enabled
 
 const variableForms = ref<Map<string, EnvironmentVariable>>(new Map());
 const editableVariables = ref<string[]>([]);
