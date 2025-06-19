@@ -18,13 +18,9 @@ export const useInsightsStore = defineStore('insights', () => {
 		() => getResourcePermissions(usersStore.currentUser?.globalScopes).insights,
 	);
 
-	const isInsightsEnabled = computed(() =>
-		settingsStore.settings.loadedModules.includes('insights'),
-	);
+	const isInsightsEnabled = computed(() => true); // License bypassed - insights always enabled
 
-	const isDashboardEnabled = computed(
-		() => settingsStore.moduleSettings.insights?.dashboard ?? false,
-	);
+	const isDashboardEnabled = computed(() => true); // License bypassed - dashboard always enabled
 
 	const isSummaryEnabled = computed(
 		() => globalInsightsPermissions.value.list && isInsightsEnabled.value,

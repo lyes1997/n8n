@@ -58,13 +58,9 @@ export class LicenseService {
 	}
 
 	async requestEnterpriseTrial(user: User) {
-		await axios.post('https://enterprise.n8n.io/enterprise-trial', {
-			licenseType: 'enterprise',
-			firstName: user.firstName,
-			lastName: user.lastName,
-			email: user.email,
-			instanceUrl: this.urlService.getWebhookBaseUrl(),
-		});
+		// License bypassed - no external license server calls needed
+		this.logger.info('Enterprise trial request bypassed - all features already enabled');
+		return;
 	}
 
 	async registerCommunityEdition({
@@ -80,30 +76,17 @@ export class LicenseService {
 		instanceUrl: string;
 		licenseType: string;
 	}): Promise<{ title: string; text: string }> {
-		try {
-			const {
-				data: { licenseKey, ...rest },
-			} = await axios.post<{ title: string; text: string; licenseKey: string }>(
-				'https://enterprise.n8n.io/community-registered',
-				{
-					email,
-					instanceId,
-					instanceUrl,
-					licenseType,
-				},
-			);
-			this.eventService.emit('license-community-plus-registered', { userId, email, licenseKey });
-			return rest;
-		} catch (e: unknown) {
-			if (e instanceof AxiosError) {
-				const error = e as AxiosError<{ message: string }>;
-				const errorMsg = error.response?.data?.message ?? e.message;
-				throw new BadRequestError('Failed to register community edition: ' + errorMsg);
-			} else {
-				this.logger.error('Failed to register community edition', { error: ensureError(e) });
-				throw new BadRequestError('Failed to register community edition');
-			}
-		}
+		// License bypassed - no external license server calls needed
+		this.logger.info('Community edition registration bypassed - all features already enabled');
+		this.eventService.emit('license-community-plus-registered', {
+			userId,
+			email,
+			licenseKey: 'bypassed',
+		});
+		return {
+			title: 'Registration Complete',
+			text: 'All enterprise features are enabled without registration.',
+		};
 	}
 
 	getManagementJwt(): string {

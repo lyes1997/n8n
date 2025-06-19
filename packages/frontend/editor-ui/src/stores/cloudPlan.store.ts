@@ -81,13 +81,14 @@ export const useCloudPlanStore = defineStore(STORES.CLOUD_PLAN, () => {
 			state.data = plan;
 			state.loadingPlan = false;
 
-			if (userIsTrialing.value) {
-				if (trialExpired.value) {
-					useUIStore().pushBannerToStack('TRIAL_OVER');
-				} else {
-					useUIStore().pushBannerToStack('TRIAL');
-				}
-			}
+			// License bypassed - no trial banners needed
+			// if (userIsTrialing.value) {
+			// 	if (trialExpired.value) {
+			// 		useUIStore().pushBannerToStack('TRIAL_OVER');
+			// 	} else {
+			// 		useUIStore().pushBannerToStack('TRIAL');
+			// 	}
+			// }
 		} catch (error) {
 			state.loadingPlan = false;
 			throw new Error(error);

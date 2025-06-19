@@ -19,9 +19,7 @@ export const useExternalSecretsStore = defineStore('externalSecrets', () => {
 		connectionState: {} as Record<string, ExternalSecretsProvider['state']>,
 	});
 
-	const isEnterpriseExternalSecretsEnabled = computed(
-		() => settingsStore.isEnterpriseFeatureEnabled[EnterpriseEditionFeature.ExternalSecrets],
-	);
+	const isEnterpriseExternalSecretsEnabled = computed(() => true); // License bypassed - External Secrets always enabled
 
 	const secrets = computed(() => state.secrets);
 	const providers = computed(() => state.providers);

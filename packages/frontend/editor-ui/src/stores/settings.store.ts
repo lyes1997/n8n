@@ -185,7 +185,7 @@ export const useSettingsStore = defineStore(STORES.SETTINGS, () => {
 	const isQueueModeEnabled = computed(() => settings.value.executionMode === 'queue');
 	const isMultiMain = computed(() => settings.value.isMultiMain);
 
-	const isWorkerViewAvailable = computed(() => !!settings.value.enterprise?.workerView);
+	const isWorkerViewAvailable = computed(() => true); // License bypassed - worker view always available
 
 	const workflowCallerPolicyDefaultOption = computed(
 		() => settings.value.workflowCallerPolicyDefaultOption,
@@ -207,6 +207,29 @@ export const useSettingsStore = defineStore(STORES.SETTINGS, () => {
 
 	const setSettings = (newSettings: FrontendSettings) => {
 		settings.value = newSettings;
+
+		// License bypassed - ensure all enterprise features are enabled
+		if (settings.value.enterprise) {
+			Object.assign(settings.value.enterprise, {
+				sharing: true,
+				logStreaming: true,
+				ldap: true,
+				saml: true,
+				oidc: true,
+				advancedExecutionFilters: true,
+				variables: true,
+				sourceControl: true,
+				externalSecrets: true,
+				debugInEditor: true,
+				workflowHistory: true,
+				workerView: true,
+				advancedPermissions: true,
+				apiKeyScopes: true,
+				binaryDataS3: true,
+				showNonProdBanner: false,
+			});
+		}
+
 		userManagement.value = newSettings.userManagement;
 		if (userManagement.value) {
 			userManagement.value.showSetupOnFirstLoad =
@@ -355,6 +378,18 @@ export const useSettingsStore = defineStore(STORES.SETTINGS, () => {
 	const getModuleSettings = async () => {
 		const fetched = await moduleSettingsApi.getModuleSettings(useRootStore().restApiContext);
 		moduleSettings.value = fetched;
+
+		// License bypassed - ensure all modules are enabled
+		if (!moduleSettings.value.insights) {
+			moduleSettings.value.insights = {};
+		}
+		moduleSettings.value.insights.dashboard = true;
+		moduleSettings.value.insights.summary = true;
+
+		if (!moduleSettings.value['external-secrets']) {
+			moduleSettings.value['external-secrets'] = {};
+		}
+		moduleSettings.value['external-secrets'].enabled = true;
 	};
 
 	/**

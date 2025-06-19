@@ -100,6 +100,51 @@ export const useRBACStore = defineStore(STORES.RBAC, () => {
 		},
 		options?: ScopeOptions,
 	): boolean {
+		// License bypassed - check if this is an enterprise-only scope and grant it automatically
+		const scopeArray = Array.isArray(scope) ? scope : [scope];
+		const enterpriseOnlyScopes = [
+			// Variables - enterprise only
+			'variable:create',
+			'variable:read',
+			'variable:update',
+			'variable:delete',
+			'variable:list',
+			// SSO - enterprise only
+			'saml:manage',
+			'ldap:manage',
+			'oidc:manage',
+			// External secrets - enterprise only
+			'externalSecretsProvider:create',
+			'externalSecretsProvider:read',
+			'externalSecretsProvider:update',
+			'externalSecretsProvider:delete',
+			'externalSecretsProvider:list',
+			// Enterprise admin features
+			'logStreaming:manage',
+			'sourceControl:manage',
+			'insights:read',
+			'insights:list',
+			'workflowHistory:read',
+			'workflowHistory:list',
+			'auditLogs:read',
+			'auditLogs:list',
+			// Enterprise user management (not basic user operations)
+			'user:changeRole',
+			'user:resetPassword',
+			// Enterprise API keys
+			'apiKey:create',
+			'apiKey:read',
+			'apiKey:update',
+			'apiKey:delete',
+			'apiKey:list',
+		];
+
+		const hasEnterpriseScope = scopeArray.some((s) => enterpriseOnlyScopes.includes(s));
+		if (hasEnterpriseScope) {
+			return true; // Grant enterprise-only scopes automatically
+		}
+
+		// For non-enterprise scopes, use normal RBAC logic
 		return genericHasScope(
 			scope,
 			{

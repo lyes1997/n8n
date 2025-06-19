@@ -111,9 +111,7 @@ const mainMenuItems = computed(() => [
 		customIconSize: 'medium',
 		position: 'bottom',
 		route: { to: { name: VIEWS.INSIGHTS } },
-		available:
-			settingsStore.settings.loadedModules.includes('insights') &&
-			hasPermission(['rbac'], { rbac: { scope: 'insights:list' } }),
+		available: true, // License bypassed - insights always available
 	},
 	{
 		id: 'help',
